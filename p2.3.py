@@ -7,11 +7,13 @@ def normalSample():
     return np.random.normal(0,1,25)
 
 baseSample = normalSample()
+baseMean = np.mean(baseSample)
+baseSD = np.std(baseSample)
 
 means = []
 
 for i in range(0,2000):
-    sample = np.random.choice(baseSample, 25)
+    sample = np.random.normal(baseMean, baseSD, 25)
     means.append(np.mean(sample))
 means = np.array(means)
 
