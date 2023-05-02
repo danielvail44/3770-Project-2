@@ -13,7 +13,7 @@ for line in lines:
     value = line.strip(" \n")
     if (value != ""):
         palindromes.append(int(value))
-
+palindromes = np.array(palindromes)
 # Create list containing distance between consecutive palindromes
 distances = []
 for i in range(1, len(palindromes)):
