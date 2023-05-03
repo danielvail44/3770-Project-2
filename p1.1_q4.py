@@ -1,41 +1,75 @@
 import numpy as np
-from scipy.stats import poisson, chi2, chisquare, chi2_contingency
+from matplotlib import pyplot as plt
+import data
+import scipy.stats as stats
 
-# Load the data
-data = np.loadtxt('CMV_DNA.txt', dtype=int)
 
-# Set the bin width and the range of the intervals
+
 bin_width = 3000
-interval_range = (0, 229354+3000)
+# Create bin bounds, adding bin_width to the upper bound to ensure all data is included
+interval_range = (0, data.palindromes.max()+bin_width)
 
-# Compute the histogram of the palindromes
-hist, bin_edges = np.histogram(data, bins=np.arange(*interval_range, bin_width))
+# Create histogram containing bins generated
+hist, bin_edges = np.histogram(data.palindromes, bins=np.arange(*interval_range, bin_width))
 
-# Compute the expected frequencies under the Poisson distribution with parameter lambda_p
-lambda_p = np.mean(hist)
-poisson_probs = poisson.pmf(np.arange(len(hist)), mu=lambda_p) * 296
 
-# Compute the expected frequencies under the exponential distribution with parameter lambda_e
-lambda_e = 1 / lambda_p
-exponential_probs = poisson_probs * np.exp(-lambda_e) * lambda_e
+oCounts = np.zeros(hist.max() + 1)
+# Sort bins into table based on observed number of palindromes per bin
+for count in hist:
+    oCounts[count] += 1
+sampleMean = np.mean(oCounts)
+sampleVar = np.var(oCounts)
 
-# Compute the chi-squared statistic and the p-value
-observed_frequencies = hist
-expected_frequencies = poisson_probs
-print(sum(observed_frequencies))
-print(sum(expected_frequencies))
-df = len(hist) - 1
-chi2_statistic, p_value = chisquare(observed_frequencies, expected_frequencies, df)
+lambda_p = 0
+elements = 0
+# Calculate lambda based on expected value of bins
+for i, e in enumerate(oCounts):
+    lambda_p += i*e
+    elements += e
+lambda_p = lambda_p/elements
 
-# Set the significance level
-alpha = 0.05
-print (p_value)
+print (f"Lambda = {lambda_p}")
+print(f"Number of elements: {elements}")
+
+# Combine bins 8 and up into single bin because expected value <3
+oldCounts = oCounts
+oCounts = np.zeros(9)
+oCounts = oldCounts[0:9]
+oCounts[8] = np.sum(oldCounts[8:14])
+
+
+print(f"Var: {sampleVar}, mean: {sampleMean}")
+
+eCounts = len(hist)*stats.poisson.pmf(np.arange(len(oCounts)), mu=lambda_p)
+eCounts[-1] += len(hist)*(1-stats.poisson.cdf(len(eCounts-1), mu=lambda_p))
+
+
+for i, count in enumerate(oCounts):
+    print(f"Plaindrome count: {i}, observed occurrences: {count}, expected: {eCounts[i]:.2f}")
+
+
+
+observed_frequencies = oCounts
+expected_frequencies = eCounts
+
+test_statistic = 0
+for i in range(0, len(oCounts)):
+    test_statistic += (oCounts[i] - eCounts[i])**2/eCounts[i]
+
+print(f"\nTest statistic: {test_statistic:.2f}")
+# Number of bins - parameters - 1
+df = len(oCounts) - 2
+alpha = .05
+lBound = stats.chi2.ppf(alpha/2, df)
+uBound = stats.chi2.ppf(1-alpha/2, df)
+print(f"Upper bound: {uBound:.2f}, lower bound: {lBound:.2f}")
+
 # Check the null hypothesis of the Poisson distribution
-if p_value > alpha:
-    print("The null hypothesis of the Poisson distribution is not rejected.")
-else:
+if (test_statistic > uBound) or (test_statistic < lBound):
     print("The null hypothesis of the Poisson distribution is rejected.")
+else:
+    print("The null hypothesis of the Poisson distribution is not rejected.")
 
 # Compare the estimated Poisson parameter lambda_p with the parameter lambda_e
 print(f"Estimated Poisson parameter: lambda_p = {lambda_p:.2f}")
-print(f"Parameter of the exponential distribution: lambda_e = {lambda_e:.2f}")
+
