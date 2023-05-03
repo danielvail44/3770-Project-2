@@ -27,6 +27,7 @@ for i, e in enumerate(oCounts):
     lambda_p += i*e
     elements += e
 lambda_p = lambda_p/elements
+print(stats.poisson.stats(mu=lambda_p, moments='mv'))
 
 print (f"Lambda = {lambda_p}")
 print(f"Number of elements: {elements}")
