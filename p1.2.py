@@ -4,14 +4,8 @@ import data
 from scipy.stats import nbinom
 import math
 
-sampleMean = np.mean(data.distances)
-sampleVar = np.var(data.distances)
 
-p = sampleMean/sampleVar
-r = (p*sampleMean)/(1-p)
 
-print(f"r point estimator: {r}, p point estimator: {p.round(8)}")
-print(f"Var: {sampleVar}, mean: {sampleMean}")
 bin_width = 3000
 interval_range = (0, data.palindromes.max()+bin_width)
 
@@ -20,20 +14,35 @@ hist, bin_edges = np.histogram(data.palindromes, bins=np.arange(*interval_range,
 
 oCounts = np.zeros(hist.max() + 1)
 
+
+
 for count in hist:
     oCounts[count] += 1
+
+sampleMean = np.mean(oCounts)
+sampleVar = np.var(oCounts)
+
+p = sampleMean/sampleVar
+r = (p*sampleMean)/(1-p)
+
+print(f"r point estimator: {r}, p point estimator: {p}")
+print(f"Var: {sampleVar}, mean: {sampleMean}")
+
 
 eCounts = np.zeros(hist.max() + 1)
 
 for i, count in enumerate(eCounts):
-    #eCounts[i] = math.comb(i+1-1,i)*p**1*(1-p)**i*3000
-    eCounts[i] = nbinom.pmf(3000, r*(i+1), p)
+    #eCounts[i] = math.comb(i+r-1,i)*p**1*(1-p)**i
+    eCounts[i] = nbinom.pmf(i, r, p)
 
 print(nbinom.stats(r, p, moments='mv'))
 
 
 for i, count in enumerate(oCounts):
     print(f"Plaindrome count: {i}, observed occurrences: {count}, expected: {eCounts[i]}")
+
+
+
 
 fig, ax = plt.subplots(1, 1)
 x = np.arange(nbinom.ppf(0.01, r, p),
