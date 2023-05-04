@@ -16,6 +16,6 @@ oCounts = np.zeros(hist.max() + 1)
 for count in hist:
     oCounts[count] += 1
 
-
+print(f"Palindrome count    Observed occurrences:")
 for i, count in enumerate(oCounts):
-    print(f"Plaindrome count: {i}, observed occurrences: {count}")
+    print(f"{i}                    {int(count)}")
