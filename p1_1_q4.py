@@ -23,11 +23,7 @@ sampleVar = np.var(oCounts)
 lambda_p = 0
 elements = 0
 # Calculate lambda based on expected value of bins
-for i, e in enumerate(oCounts):
-    lambda_p += i*e
-    elements += e
-lambda_p = lambda_p/elements
-print(stats.poisson.stats(mu=lambda_p, moments='mv'))
+lambda_p = np.mean(hist)
 
 print (f"Lambda = {lambda_p}")
 print(f"Number of elements: {elements}")

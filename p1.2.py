@@ -37,8 +37,8 @@ sampleVar = sampleVar/(elements-1)
 
 #p = sampleMean/sampleVar
 #r = (p*sampleMean)/(1-p)
-p = 1-sampleMean/sampleVar
-r = sampleMean**2/(sampleVar - sampleMean)
+# p = 1-sampleMean/sampleVar
+# r = sampleMean**2/(sampleVar - sampleMean)
 
 print(f"r point estimator: {r}, p point estimator: {p}")
 print(f"Var: {sampleVar}, mean: {sampleMean}")
